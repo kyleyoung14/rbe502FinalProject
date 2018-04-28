@@ -27,17 +27,17 @@ from arm_env import ArmEnv
 np.random.seed(1)
 tf.set_random_seed(1)
 
-MAX_EPISODES = 600
-MAX_EP_STEPS = 200
-LR_A = 1e-4  # learning rate for actor
-LR_C = 1e-4  # learning rate for critic
+MAX_EPISODES = 20
+MAX_EP_STEPS = 400
+LR_A = 2e-4  # learning rate for actor
+LR_C = 2e-4  # learning rate for critic
 GAMMA = 0.9  # reward discount
 REPLACE_ITER_A = 1100
 REPLACE_ITER_C = 1000
 MEMORY_CAPACITY = 5000
 BATCH_SIZE = 16
 VAR_MIN = 0.1
-RENDER = True
+# RENDER = True
 LOAD = False
 MODE = ['easy', 'hard']
 n_model = 1
@@ -211,7 +211,8 @@ else:
 
 
 def train():
-    var = 2.  # control exploration
+    var = 5.  # control exploration
+    doneCnt = 0
 
     for ep in range(MAX_EPISODES):
         s = env.reset()
@@ -219,8 +220,8 @@ def train():
 
         for t in range(MAX_EP_STEPS):
         # while True:
-            if RENDER:
-                env.render()
+            # if RENDER:
+            #     env.render()
 
             # Added exploration noise
             a = actor.choose_action(s)
@@ -243,14 +244,19 @@ def train():
             ep_reward += r
 
             if t == MAX_EP_STEPS-1 or done:
-            # if done:
-                result = '| done' if done else '| ----'
+                if done:
+                    doneCnt += 1
+                    result = '| done:%3i' % doneCnt  
+                else:
+                    result = '| --------'
                 print('Ep:', ep,
                       result,
                       '| R: %i' % int(ep_reward),
                       '| Explore: %.2f' % var,
                       )
                 break
+
+        env.printToCSV(ep)
 
     if os.path.isdir(path): shutil.rmtree(path)
     os.mkdir(path)
@@ -260,11 +266,11 @@ def train():
 
 
 def eval():
-    env.set_fps(30)
+    # env.set_fps(30)
     s = env.reset()
     while True:
-        if RENDER:
-            env.render()
+        # if RENDER:
+        #     env.render()
         a = actor.choose_action(s)
         s_, r, done = env.step(a)
         s = s_
