@@ -1,19 +1,5 @@
-"""
-Environment for Robot Arm.
-You can customize this script in a way you want.
-
-View more on [Python] : https://morvanzhou.github.io/tutorials/
-
-
-Requirement:
-pyglet >= 1.2.4
-numpy >= 1.12.1
-"""
 import numpy as np
 import csv
-
-
-pyglet.clock.set_fps_limit(10000)
 
 
 class ArmEnv(object):
@@ -116,7 +102,7 @@ class ArmEnv(object):
                           ]), t_arms[-3:]
 
     def _r_func(self, distance):
-        t = 50
+        t = 20 #TUNING
         abs_distance = np.sqrt(np.sum(np.square(distance)))
         r = -abs_distance/200
         if abs_distance < self.point_l and (not self.get_point):
