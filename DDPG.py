@@ -2,8 +2,8 @@ import tensorflow as tf
 import numpy as np
 import os
 import shutil
+from environment import Environment
 import matplotlib.pyplot as plt
-from arm_env import ArmEnv
 
 
 np.random.seed(1)
@@ -20,13 +20,11 @@ MEMORY_CAPACITY = 5000
 BATCH_SIZE = 16
 VAR_MIN = 0.1
 LOAD = False
-MODE = ['easy', 'hard']
-n_model = 1
 
-env = ArmEnv(mode=MODE[n_model])
-STATE_DIM = env.state_dim
-ACTION_DIM = env.action_dim
-ACTION_BOUND = env.action_bound
+env = Environment()
+STATE_DIM = env.state_dime
+ACTION_DIM = env.act_dime
+ACTION_BOUND = env.act_limits
 
 # all placeholder for tf
 with tf.name_scope('S'):
@@ -183,7 +181,8 @@ actor.add_grad_to_graph(critic.a_grads)
 M = Memory(MEMORY_CAPACITY, dims=2 * STATE_DIM + ACTION_DIM + 1)
 
 saver = tf.train.Saver()
-path = './'+MODE[n_model]
+
+path = './'
 
 if LOAD:
     saver.restore(sess, tf.train.latest_checkpoint(path))
@@ -271,7 +270,8 @@ def train():
                       '| Explore: %.2f' % var,
                       '| Avg25: %.2f' % roll25,
                       '| Avg100: %.2f' % roll100,
-                      '| AvgRun: %.2f' % rollRun
+                      '| AvgRun: %.2f' % rollRun,
+                      '| Goal: ' + str(env.goal)
                       )
                 
 
@@ -314,7 +314,7 @@ def train():
 
     # Plot the average reward
     fig = plt.figure(1)
-    plt.plot(allRewards)
+    plt.plot(allRollReward)
     plt.xlabel('Episodes')
     plt.ylabel('Average Reward')
     plt.title('Average DDPG Rewards Over Time')
